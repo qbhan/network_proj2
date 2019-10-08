@@ -113,7 +113,8 @@ void TCPAssignment::syscall_socket(UUID syscallUUID, int pid, int param1, int pa
 
 void TCPAssignment::syscall_close(UUID syscallUUID, int pid, int socket)
 {
-	std::list<socket_info>close_socket_list = this->socket_list;
+//	std::list<socket_info>close_socket_list = this->socket_list;
+/*
 	std::list<socket_info>::iterator iter;
 	for(iter=this->socket_list.begin(); iter != this->socket_list.end(); ++iter){
 		if ((*iter).socket == socket){
@@ -123,11 +124,21 @@ void TCPAssignment::syscall_close(UUID syscallUUID, int pid, int socket)
 	}
 	this->removeFileDescriptor(pid, socket);
 	this->returnSystemCall(syscallUUID, 0);
+	*/
+	
+	for(int i = 0; i < this->socket_list.size(); i++){
+		if (std::get<0>(this->socket_list[i]) == socket){
+			this->socket_list.erase(this->socket_list.begin() + i);
+			break;
+		}
+	}
+	this->removeFileDescriptor(pid, socket);											
+	this->returnSystemCall(syscallUUID, 0);
 }
 
 void TCPAssignment::syscall_bind(UUID syscallUUID, int pid, int socket, struct sockaddr *(addr), socklen_t sock_len)
 {
-	socket_info new_socket;
+/*	socket_info new_socket;
 	struct sockaddr_in *sock_addr = (sockaddr_in *)addr;
 	new_socket.socket = socket;
 	new_socket.addr = sock_addr->sin_addr.s_addr;
@@ -159,6 +170,29 @@ void TCPAssignment::syscall_bind(UUID syscallUUID, int pid, int socket, struct s
 	else {
 		this->socket_list.push_back(new_socket);
 		this->returnSystemCall(syscallUUID, 0);
+	} */
+
+	socket_info new_socket;
+	struct sockaddr_in *sock_addr = (sockaddr_in *)addr;
+	new_socket = std::make_tuple(socket, sock_addr->sin_addr.s_addr, sock_addr->sin_port);
+
+	int cnt = 0;
+	int size = this->socket_list.size();
+	for (int i=0; i<size; i++){
+		if (std::get<0>(new_socket) == std::get<0>(this->socket_list[i])){
+			cnt++;
+		} else if (std::get<1>(new_socket)==0 || std::get<1>(this->socket_list[i])==0){
+			cnt++;
+		} else if (std::get<1>(new_socket) == std::get<1>(this->socket_list[i]) && std::get<2>(new_socket) == std::get<2>(this->socket_list[i])){
+			cnt++;
+		}
+	}
+	if (cnt > 0) {
+		this->returnSystemCall(syscallUUID, -1); 
+	}
+	else {
+		this->socket_list.push_back(new_socket);
+		this->returnSystemCall(syscallUUID, 0);
 	}
 }
 
@@ -167,12 +201,21 @@ void TCPAssignment::syscall_getsockname(UUID syscallUUID, int pid, int socket, s
 	struct sockaddr_in *addr_in = (struct sockaddr_in *)addr;
 	addr_in->sin_family = AF_INET;
 
-	std::list<socket_info> name_socket_list = this->socket_list;
+/*	std::list<socket_info> name_socket_list = this->socket_list;
 	std::list<socket_info>::iterator iter ;
 	for(iter=name_socket_list.begin(); iter!=name_socket_list.end(); iter++){
 		if ((*iter).socket == socket){
 			addr_in->sin_addr.s_addr = (*iter).addr;
 			addr_in->sin_port = (*iter).port;
+			this->returnSystemCall(syscallUUID, 0);
+		}
+	}
+	*/
+	int size = this->socket_list.size();
+	for(int i = 0; i<size; i++){
+		if (std::get<0>(this->socket_list[i]) == socket){
+			addr_in->sin_addr.s_addr = std::get<1>(this->socket_list[i]);
+			addr_in->sin_port = std::get<2>(this->socket_list[i]);
 			this->returnSystemCall(syscallUUID, 0);
 		}
 	}

@@ -15,6 +15,8 @@
 #include <netinet/tcp.h>
 #include <netinet/ip.h>
 #include <netinet/in.h>
+#include <vector>
+#include <tuple>
 
 
 #include <E/E_TimerModule.hpp>
@@ -22,12 +24,14 @@
 namespace E
 {
 
-typedef struct socket_info socket_info;
+/*typedef struct socket_info socket_info;
 struct socket_info{
 	int socket;
 	long addr;
 	short port;
-};
+};*/
+typedef std::tuple<int, long, short> socket_info;
+typedef std::vector<socket_info> sock_list;
 
 
 class TCPAssignment : public HostModule, public NetworkModule, public SystemCallInterface, private NetworkLog, private TimerModule
@@ -43,7 +47,8 @@ private:
 
 public:
 	TCPAssignment(Host* host);
-	std::list<socket_info> socket_list;
+//	std::list<socket_info> socket_list;
+	sock_list socket_list;
 	virtual void initialize();
 	virtual void finalize();
 	virtual ~TCPAssignment();
