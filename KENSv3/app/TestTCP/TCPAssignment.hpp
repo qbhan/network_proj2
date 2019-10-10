@@ -24,12 +24,6 @@
 namespace E
 {
 
-/*typedef struct socket_info socket_info;
-struct socket_info{
-	int socket;
-	long addr;
-	short port;
-};*/
 typedef std::tuple<int, long, short> socket_info;
 typedef std::vector<socket_info> sock_list;
 
@@ -47,13 +41,11 @@ private:
 
 public:
 	TCPAssignment(Host* host);
-//	std::list<socket_info> socket_list;
 	sock_list socket_list;
 	virtual void initialize();
 	virtual void finalize();
 	virtual ~TCPAssignment();
-	//virtual void syscall_socket(UUID syscallUUID, int pid, int param1, int param2);
-	//virtual void syscall_bind(UUID syscallUUID, int pid, int socket, struct sockaddr *addr, socklen_t sock_len);
+
 protected:
 	virtual void systemCallback(UUID syscallUUID, int pid, const SystemCallParameter& param) final;
 	virtual void packetArrived(std::string fromModule, Packet* packet) final;
