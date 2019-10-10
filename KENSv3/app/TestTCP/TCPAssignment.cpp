@@ -41,11 +41,6 @@ void TCPAssignment::finalize()
 
 }
 
-//void TCPAssignment::syscall_socket(UUID syscallUUID, int pid, int param1, int param2)
-//{
-//	this->returnSystemCall(syscallUUID, createFileDescriptor(pid))
-//}
-
 
 void TCPAssignment::systemCallback(UUID syscallUUID, int pid, const SystemCallParameter& param)
 {
